@@ -56,8 +56,13 @@ async function runLeadManagerCycle() {
                 }
                 else {
                     console.log(`[${ora()}] 📱 Tentativi esauriti — WA finale a ${lead.nome} ${lead.cognome}`);
-                    await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, abbiamo cercato di contattarti più volte senza successo. ` +
-                        `Se in futuro fossi interessato, siamo a tua disposizione.`);
+                    try {
+                        await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, abbiamo cercato di contattarti più volte senza successo. ` +
+                            `Se in futuro fossi interessato, siamo a tua disposizione.`);
+                    }
+                    catch (e) {
+                        console.error("WhatsApp error:", e);
+                    }
                     await (0, googleSheets_1.updatePipelineRow)(lead.telefono, { status: statuses_1.STATUSES.NON_INTERESSATO });
                 }
                 continue;
@@ -165,7 +170,12 @@ async function handleVapiWebhook(body) {
             if (!lead)
                 throw new Error(`Lead non trovato in pipeline: ${telefono}`);
             const infoLink = process.env.INFO_LINK ?? 'https://predicta.it/info';
-            await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ecco le informazioni che hai richiesto: ${infoLink}`);
+            try {
+                await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ecco le informazioni che hai richiesto: ${infoLink}`);
+            }
+            catch (e) {
+                console.error("WhatsApp error:", e);
+            }
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
                 status: statuses_1.STATUSES.INFO_INVIATE,
                 prossimaTentativo: aggiungiOre(48),
@@ -193,7 +203,12 @@ async function handleVapiWebhook(body) {
             const lead = pipeline.find((l) => l.telefono === telefono);
             if (!lead)
                 throw new Error(`Lead non trovato in pipeline: ${telefono}`);
-            await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ti ho appena chiamato ma non ho trovato risposta. Ti ricontatterò presto!`);
+            try {
+                await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ti ho appena chiamato ma non ho trovato risposta. Ti ricontatterò presto!`);
+            }
+            catch (e) {
+                console.error("WhatsApp error:", e);
+            }
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
                 status: statuses_1.STATUSES.NON_RISPONDE,
                 prossimaTentativo: aggiungiOre(24),

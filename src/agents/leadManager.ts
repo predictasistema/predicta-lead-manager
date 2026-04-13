@@ -71,11 +71,11 @@ export async function runLeadManagerCycle(): Promise<void> {
           console.log(
             `[${ora()}] 📱 Tentativi esauriti — WA finale a ${lead.nome} ${lead.cognome}`,
           );
-          await sendWhatsApp(
+          try { await sendWhatsApp(
             lead,
             `Ciao ${lead.nome}, abbiamo cercato di contattarti più volte senza successo. ` +
             `Se in futuro fossi interessato, siamo a tua disposizione.`,
-          );
+          ); } catch(e) { console.error("WhatsApp error:", e); }
           await updatePipelineRow(lead.telefono, { status: STATUSES.NON_INTERESSATO });
         }
         continue;
@@ -198,10 +198,10 @@ export async function handleVapiWebhook(body: any): Promise<void> {
       const lead = pipeline.find((l) => l.telefono === telefono);
       if (!lead) throw new Error(`Lead non trovato in pipeline: ${telefono}`);
       const infoLink = process.env.INFO_LINK ?? 'https://predicta.it/info';
-      await sendWhatsApp(
+      try { await sendWhatsApp(
         lead,
         `Ciao ${lead.nome}, ecco le informazioni che hai richiesto: ${infoLink}`,
-      );
+      ); } catch(e) { console.error("WhatsApp error:", e); }
       await updatePipelineRow(telefono, {
         status: STATUSES.INFO_INVIATE,
         prossimaTentativo: aggiungiOre(48),
@@ -232,10 +232,10 @@ export async function handleVapiWebhook(body: any): Promise<void> {
       const pipeline = await getPipelineLeads();
       const lead = pipeline.find((l) => l.telefono === telefono);
       if (!lead) throw new Error(`Lead non trovato in pipeline: ${telefono}`);
-      await sendWhatsApp(
+      try { await sendWhatsApp(
         lead,
         `Ciao ${lead.nome}, ti ho appena chiamato ma non ho trovato risposta. Ti ricontatterò presto!`,
-      );
+      ); } catch(e) { console.error("WhatsApp error:", e); }
       await updatePipelineRow(telefono, {
         status: STATUSES.NON_RISPONDE,
         prossimaTentativo: aggiungiOre(24),
