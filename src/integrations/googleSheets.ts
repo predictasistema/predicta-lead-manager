@@ -50,7 +50,9 @@ export async function getLeads(): Promise<Lead[]> {
     range: `${SHEET}!A2:L`,
   });
   const rows = res.data.values ?? [];
-  return rows.map((row, i) => rowToLead(row, i + 2));
+  return rows
+    .map((row, i) => rowToLead(row, i + 2))
+    .filter(lead => lead.status === 'nuovo');
 }
 
 export async function updateLead(telefono: string, updates: Partial<Lead>): Promise<void> {

@@ -54,7 +54,9 @@ async function getLeads() {
         range: `${SHEET}!A2:L`,
     });
     const rows = res.data.values ?? [];
-    return rows.map((row, i) => rowToLead(row, i + 2));
+    return rows
+        .map((row, i) => rowToLead(row, i + 2))
+        .filter(lead => lead.status === 'nuovo');
 }
 async function updateLead(telefono, updates) {
     const auth = getAuth();

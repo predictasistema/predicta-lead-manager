@@ -109,10 +109,10 @@ async function parseCallResult(webhookBody) {
     // Ignora tutti gli eventi che non sono end-of-call-report
     if (msg?.type !== 'end-of-call-report')
         return null;
-    const rawTranscript = msg?.transcript ?? '';
+    const rawTranscript = msg?.message?.transcript ?? msg?.transcript ?? '';
     const transcript = rawTranscript.toLowerCase();
-    const endedReason = (msg?.endedReason ?? '').toLowerCase();
-    const note = rawTranscript.slice(0, 200);
+    const endedReason = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
+    const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
     // ── Segreteria / voicemail ───────────────────────────────────
     if (endedReason === 'voicemail') {
         return { status: 'segreteria', note };

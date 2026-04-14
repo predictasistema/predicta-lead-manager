@@ -147,10 +147,10 @@ export async function parseCallResult(webhookBody: any): Promise<ParsedCallOutco
   // Ignora tutti gli eventi che non sono end-of-call-report
   if (msg?.type !== 'end-of-call-report') return null;
 
-  const rawTranscript: string = msg?.transcript ?? '';
+  const rawTranscript: string = msg?.message?.transcript ?? msg?.transcript ?? '';
   const transcript = rawTranscript.toLowerCase();
-  const endedReason: string = (msg?.endedReason ?? '').toLowerCase();
-  const note = rawTranscript.slice(0, 200);
+  const endedReason: string = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
+  const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
 
   // ── Segreteria / voicemail ───────────────────────────────────
   if (endedReason === 'voicemail') {
