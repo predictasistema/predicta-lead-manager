@@ -115,7 +115,7 @@ async function parseCallResult(webhookBody) {
     console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
     const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
     // ── Segreteria / voicemail ───────────────────────────────────
-    if (endedReason === 'voicemail') {
+    if (endedReason === 'voicemail' || endedReason === 'assistant-ended-call') {
         return { status: 'segreteria', note };
     }
     // ── Nessun transcript → non risponde ────────────────────────
