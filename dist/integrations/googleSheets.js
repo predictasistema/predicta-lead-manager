@@ -4,6 +4,7 @@ exports.getLeads = getLeads;
 exports.updateLead = updateLead;
 exports.getPipelineLeads = getPipelineLeads;
 exports.updatePipelineRow = updatePipelineRow;
+exports.getAllLeads = getAllLeads;
 const googleapis_1 = require("googleapis");
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
 const SHEET = 'leads';
@@ -96,5 +97,15 @@ async function getPipelineLeads() {
 }
 async function updatePipelineRow(telefono, updates) {
     return updateLead(telefono, updates);
+}
+async function getAllLeads() {
+    const auth = getAuth();
+    const sheets = googleapis_1.google.sheets({ version: 'v4', auth });
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET}!A2:L`,
+    });
+    const rows = res.data.values ?? [];
+    return rows.map((row, i) => rowToLead(row, i + 2));
 }
 //# sourceMappingURL=googleSheets.js.map

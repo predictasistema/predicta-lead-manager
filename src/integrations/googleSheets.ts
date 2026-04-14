@@ -98,3 +98,14 @@ export async function getPipelineLeads(): Promise<Lead[]> {
 export async function updatePipelineRow(telefono: string, updates: any): Promise<void> {
   return updateLead(telefono, updates);
 }
+
+export async function getAllLeads(): Promise<Lead[]> {
+  const auth = getAuth();
+  const sheets = google.sheets({ version: 'v4', auth });
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${SHEET}!A2:L`,
+  });
+  const rows = res.data.values ?? [];
+  return rows.map((row, i) => rowToLead(row, i + 2));
+}

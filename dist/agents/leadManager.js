@@ -118,7 +118,7 @@ async function handleVapiWebhook(body) {
         case 'qualificato': {
             if (dataAppuntamento && oraAppuntamento) {
                 // Ha già data e ora → crea evento su Google Calendar
-                const allLeads = await (0, googleSheets_1.getLeads)();
+                const allLeads = await (0, googleSheets_1.getAllLeads)();
                 const lead = allLeads.find((l) => l.telefono === telefono);
                 if (!lead)
                     throw new Error(`Lead non trovato: ${telefono}`);
@@ -164,7 +164,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'info_richieste': {
-            const allLeads = await (0, googleSheets_1.getLeads)();
+            const allLeads = await (0, googleSheets_1.getAllLeads)();
             const lead = allLeads.find((l) => l.telefono === telefono);
             if (!lead)
                 throw new Error(`Lead non trovato: ${telefono}`);
@@ -184,7 +184,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'non_risponde': {
-            const pipeline = await (0, googleSheets_1.getLeads)();
+            const pipeline = await (0, googleSheets_1.getAllLeads)();
             const lead = pipeline.find((l) => l.telefono === telefono);
             const tentativiAggiornati = (lead?.tentativiChiamata ?? 0) + 1;
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
@@ -198,7 +198,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'segreteria': {
-            const allLeads = await (0, googleSheets_1.getLeads)();
+            const allLeads = await (0, googleSheets_1.getAllLeads)();
             const lead = allLeads.find((l) => l.telefono === telefono);
             if (!lead)
                 throw new Error(`Lead non trovato: ${telefono}`);
