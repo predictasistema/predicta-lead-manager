@@ -154,7 +154,7 @@ export async function parseCallResult(webhookBody: any): Promise<ParsedCallOutco
   const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
 
   // ── Segreteria / voicemail ───────────────────────────────────
-  if (endedReason === 'voicemail' || endedReason === 'assistant-ended-call') {
+  if (endedReason === 'voicemail' || endedReason === 'assistant-ended-call' || endedReason === 'silence-timed-out') {
     return { status: 'segreteria', note };
   }
 
