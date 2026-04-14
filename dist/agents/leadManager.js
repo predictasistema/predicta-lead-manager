@@ -67,7 +67,7 @@ async function runLeadManagerCycle() {
                 continue;
             }
             // scheduled_call scaduto
-            if (lead.status === statuses_1.STATUSES.SCHEDULED_CALL && isPast(lead.prossimaTentativo)) {
+            if (lead.status === statuses_1.STATUSES.DA_RICONTATTARE && isPast(lead.prossimaTentativo)) {
                 console.log(`[${ora()}] 📅 Richiamo scheduled_call: ${lead.nome} ${lead.cognome}`);
                 await (0, vapi_1.startCall)(lead);
                 continue;
@@ -135,7 +135,7 @@ async function handleVapiWebhook(body) {
             else {
                 // Qualificato senza slot → richiama tra 2h per fissare
                 await (0, googleSheets_1.updatePipelineRow)(telefono, {
-                    status: statuses_1.STATUSES.SCHEDULED_CALL,
+                    status: statuses_1.STATUSES.DA_RICONTATTARE,
                     prossimaTentativo: aggiungiOre(2),
                     noteChiamata: note,
                 });
@@ -145,7 +145,7 @@ async function handleVapiWebhook(body) {
         }
         case 'richiamami': {
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
-                status: statuses_1.STATUSES.SCHEDULED_CALL,
+                status: statuses_1.STATUSES.DA_RICONTATTARE,
                 prossimaTentativo: aggiungiOre(24),
                 noteChiamata: note,
             });
@@ -234,7 +234,7 @@ async function handleVapiWebhook(body) {
         }
         case 'ostile': {
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
-                status: statuses_1.STATUSES.SCHEDULED_CALL,
+                status: statuses_1.STATUSES.DA_RICONTATTARE,
                 prossimaTentativo: aggiungiOre(24),
                 noteChiamata: 'Lead ostile al primo contatto',
             });

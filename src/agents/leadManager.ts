@@ -81,7 +81,7 @@ export async function runLeadManagerCycle(): Promise<void> {
       }
 
       // scheduled_call scaduto
-      if (lead.status === STATUSES.SCHEDULED_CALL && isPast(lead.prossimaTentativo)) {
+      if (lead.status === STATUSES.DA_RICONTATTARE && isPast(lead.prossimaTentativo)) {
         console.log(`[${ora()}] 📅 Richiamo scheduled_call: ${lead.nome} ${lead.cognome}`);
         await startCall(lead);
         continue;
@@ -161,7 +161,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
       } else {
         // Qualificato senza slot → richiama tra 2h per fissare
         await updatePipelineRow(telefono, {
-          status: STATUSES.SCHEDULED_CALL,
+          status: STATUSES.DA_RICONTATTARE,
           prossimaTentativo: aggiungiOre(2),
           noteChiamata: note,
         });
@@ -172,7 +172,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
 
     case 'richiamami': {
       await updatePipelineRow(telefono, {
-        status: STATUSES.SCHEDULED_CALL,
+        status: STATUSES.DA_RICONTATTARE,
         prossimaTentativo: aggiungiOre(24),
         noteChiamata: note,
       });
@@ -264,7 +264,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
 
     case 'ostile': {
       await updatePipelineRow(telefono, {
-        status: STATUSES.SCHEDULED_CALL,
+        status: STATUSES.DA_RICONTATTARE,
         prossimaTentativo: aggiungiOre(24),
         noteChiamata: 'Lead ostile al primo contatto',
       });
