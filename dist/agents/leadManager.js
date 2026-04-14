@@ -43,7 +43,7 @@ async function runLeadManagerCycle() {
         }
     }
     // ── 2. Lead in pipeline con altri status ─────────────────────
-    const pipeline = await (0, googleSheets_1.getPipelineLeads)();
+    const pipeline = await (0, googleSheets_1.getLeads)();
     for (const lead of pipeline) {
         try {
             // non_risponde: richiama o manda WA finale
@@ -118,11 +118,11 @@ async function handleVapiWebhook(body) {
         case 'qualificato': {
             if (dataAppuntamento && oraAppuntamento) {
                 // Ha già data e ora → crea evento su Google Calendar
-                const pipeline = await (0, googleSheets_1.getPipelineLeads)();
-                const base = pipeline.find((l) => l.telefono === telefono);
-                if (!base)
-                    throw new Error(`Lead non trovato in pipeline: ${telefono}`);
-                const fullLead = { ...base, dataAppuntamento, oraAppuntamento };
+                const allLeads = await (0, googleSheets_1.getLeads)();
+                const lead = allLeads.find((l) => l.telefono === telefono);
+                if (!lead)
+                    throw new Error(`Lead non trovato: ${telefono}`);
+                const fullLead = { ...lead, dataAppuntamento, oraAppuntamento };
                 const eventId = await (0, googleCalendar_1.createAppointment)(fullLead);
                 console.log(`[${ora()}] 📆 Appuntamento creato (eventId: ${eventId}) per ${telefono}`);
                 await (0, googleSheets_1.updatePipelineRow)(telefono, {
@@ -164,10 +164,10 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'info_richieste': {
-            const pipeline = await (0, googleSheets_1.getPipelineLeads)();
-            const lead = pipeline.find((l) => l.telefono === telefono);
+            const allLeads = await (0, googleSheets_1.getLeads)();
+            const lead = allLeads.find((l) => l.telefono === telefono);
             if (!lead)
-                throw new Error(`Lead non trovato in pipeline: ${telefono}`);
+                throw new Error(`Lead non trovato: ${telefono}`);
             const infoLink = process.env.INFO_LINK ?? 'https://predicta.it/info';
             try {
                 await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ecco le informazioni che hai richiesto: ${infoLink}`);
@@ -184,7 +184,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'non_risponde': {
-            const pipeline = await (0, googleSheets_1.getPipelineLeads)();
+            const pipeline = await (0, googleSheets_1.getLeads)();
             const lead = pipeline.find((l) => l.telefono === telefono);
             const tentativiAggiornati = (lead?.tentativiChiamata ?? 0) + 1;
             await (0, googleSheets_1.updatePipelineRow)(telefono, {
@@ -198,10 +198,10 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'segreteria': {
-            const pipeline = await (0, googleSheets_1.getPipelineLeads)();
-            const lead = pipeline.find((l) => l.telefono === telefono);
+            const allLeads = await (0, googleSheets_1.getLeads)();
+            const lead = allLeads.find((l) => l.telefono === telefono);
             if (!lead)
-                throw new Error(`Lead non trovato in pipeline: ${telefono}`);
+                throw new Error(`Lead non trovato: ${telefono}`);
             try {
                 await (0, twilio_1.sendWhatsApp)(lead, `Ciao ${lead.nome}, ti ho appena chiamato ma non ho trovato risposta. Ti ricontatterò presto!`);
             }
