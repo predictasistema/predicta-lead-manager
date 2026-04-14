@@ -112,6 +112,7 @@ async function parseCallResult(webhookBody) {
     const rawTranscript = msg?.message?.transcript ?? msg?.transcript ?? '';
     const transcript = rawTranscript.toLowerCase();
     const endedReason = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
+    console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
     const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
     // ── Segreteria / voicemail ───────────────────────────────────
     if (endedReason === 'voicemail') {

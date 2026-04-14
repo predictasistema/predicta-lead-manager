@@ -150,6 +150,7 @@ export async function parseCallResult(webhookBody: any): Promise<ParsedCallOutco
   const rawTranscript: string = msg?.message?.transcript ?? msg?.transcript ?? '';
   const transcript = rawTranscript.toLowerCase();
   const endedReason: string = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
+  console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
   const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
 
   // ── Segreteria / voicemail ───────────────────────────────────
