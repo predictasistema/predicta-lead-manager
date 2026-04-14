@@ -62,7 +62,7 @@ async function runLeadManagerCycle() {
                     catch (e) {
                         console.error("WhatsApp error:", e);
                     }
-                    await (0, googleSheets_1.updatePipelineRow)(lead.telefono, { status: statuses_1.STATUSES.NON_INTERESSATO });
+                    await (0, googleSheets_1.updateLead)(lead.telefono, { status: statuses_1.STATUSES.NON_INTERESSATO });
                 }
                 continue;
             }
@@ -125,7 +125,7 @@ async function handleVapiWebhook(body) {
                 const fullLead = { ...lead, dataAppuntamento, oraAppuntamento };
                 const eventId = await (0, googleCalendar_1.createAppointment)(fullLead);
                 console.log(`[${ora()}] 📆 Appuntamento creato (eventId: ${eventId}) per ${telefono}`);
-                await (0, googleSheets_1.updatePipelineRow)(telefono, {
+                await (0, googleSheets_1.updateLead)(telefono, {
                     status: statuses_1.STATUSES.APPUNTAMENTO_FISSATO,
                     dataAppuntamento,
                     oraAppuntamento,
@@ -134,7 +134,7 @@ async function handleVapiWebhook(body) {
             }
             else {
                 // Qualificato senza slot → richiama tra 2h per fissare
-                await (0, googleSheets_1.updatePipelineRow)(telefono, {
+                await (0, googleSheets_1.updateLead)(telefono, {
                     status: statuses_1.STATUSES.DA_RICONTATTARE,
                     prossimaTentativo: aggiungiOre(2),
                     noteChiamata: note,
@@ -144,7 +144,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'richiamami': {
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.DA_RICONTATTARE,
                 prossimaTentativo: aggiungiOre(24),
                 noteChiamata: note,
@@ -155,7 +155,7 @@ async function handleVapiWebhook(body) {
         case 'da_ricontattare': {
             const giorni = giorniRicontatto ?? 7;
             const quando = aggiungiOre(giorni * 24);
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.DA_RICONTATTARE,
                 prossimaTentativo: quando,
                 noteChiamata: note,
@@ -175,7 +175,7 @@ async function handleVapiWebhook(body) {
             catch (e) {
                 console.error("WhatsApp error:", e);
             }
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.INFO_INVIATE,
                 prossimaTentativo: aggiungiOre(48),
                 noteChiamata: note,
@@ -188,7 +188,7 @@ async function handleVapiWebhook(body) {
             const pipeline = await (0, googleSheets_1.getAllLeads)();
             const lead = pipeline.find((l) => l.telefono === telefono);
             const tentativiAggiornati = (lead?.tentativiChiamata ?? 0) + 1;
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.NON_RISPONDE,
                 tentativiChiamata: tentativiAggiornati,
                 prossimaTentativo: aggiungiOre(2),
@@ -209,7 +209,7 @@ async function handleVapiWebhook(body) {
             catch (e) {
                 console.error("WhatsApp error:", e);
             }
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.NON_RISPONDE,
                 prossimaTentativo: aggiungiOre(24),
                 noteChiamata: note,
@@ -218,7 +218,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'non_interessato': {
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.NON_INTERESSATO,
                 noteChiamata: note,
             });
@@ -226,7 +226,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'numero_errato': {
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.NUMERO_ERRATO,
                 noteChiamata: note,
             });
@@ -234,7 +234,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'ostile': {
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.DA_RICONTATTARE,
                 prossimaTentativo: aggiungiOre(24),
                 noteChiamata: 'Lead ostile al primo contatto',
@@ -243,7 +243,7 @@ async function handleVapiWebhook(body) {
             break;
         }
         case 'gia_cliente': {
-            await (0, googleSheets_1.updatePipelineRow)(telefono, {
+            await (0, googleSheets_1.updateLead)(telefono, {
                 status: statuses_1.STATUSES.GIA_CLIENTE,
                 noteChiamata: note,
             });
@@ -283,7 +283,7 @@ async function runFeedbackHandler() {
                 ? statuses_1.STATUSES.NO_SHOW
                 : statuses_1.STATUSES.APPUNTAMENTO_COMPLETATO;
             // leadId è il telefono del paziente (usato come chiave di ricerca)
-            await (0, googleSheets_1.updatePipelineRow)(leadId, {
+            await (0, googleSheets_1.updateLead)(leadId, {
                 feedbackMedico: feedback,
                 status: nuovoStatus,
             });

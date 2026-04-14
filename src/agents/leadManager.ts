@@ -4,7 +4,7 @@ import {
   getLeads,
   getAllLeads,
   updateLead,
-  updatePipelineRow,
+
   
 } from '../integrations/googleSheets';
 import { startCall, parseCallResult } from '../integrations/vapi';
@@ -75,7 +75,7 @@ export async function runLeadManagerCycle(): Promise<void> {
             `Ciao ${lead.nome}, abbiamo cercato di contattarti più volte senza successo. ` +
             `Se in futuro fossi interessato, siamo a tua disposizione.`,
           ); } catch(e) { console.error("WhatsApp error:", e); }
-          await updatePipelineRow(lead.telefono, { status: STATUSES.NON_INTERESSATO });
+          await updateLead(lead.telefono, { status: STATUSES.NON_INTERESSATO });
         }
         continue;
       }
@@ -152,7 +152,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
         const fullLead: Lead = { ...lead, dataAppuntamento, oraAppuntamento };
         const eventId = await createAppointment(fullLead);
         console.log(`[${ora()}] 📆 Appuntamento creato (eventId: ${eventId}) per ${telefono}`);
-        await updatePipelineRow(telefono, {
+        await updateLead(telefono, {
           status: STATUSES.APPUNTAMENTO_FISSATO,
           dataAppuntamento,
           oraAppuntamento,
@@ -160,7 +160,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
         });
       } else {
         // Qualificato senza slot → richiama tra 2h per fissare
-        await updatePipelineRow(telefono, {
+        await updateLead(telefono, {
           status: STATUSES.DA_RICONTATTARE,
           prossimaTentativo: aggiungiOre(2),
           noteChiamata: note,
@@ -171,7 +171,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     }
 
     case 'richiamami': {
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.DA_RICONTATTARE,
         prossimaTentativo: aggiungiOre(24),
         noteChiamata: note,
@@ -183,7 +183,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     case 'da_ricontattare': {
       const giorni = giorniRicontatto ?? 7;
       const quando = aggiungiOre(giorni * 24);
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.DA_RICONTATTARE,
         prossimaTentativo: quando,
         noteChiamata: note,
@@ -201,7 +201,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
         lead,
         `Ciao ${lead.nome}, ecco le informazioni che hai richiesto: ${infoLink}`,
       ); } catch(e) { console.error("WhatsApp error:", e); }
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.INFO_INVIATE,
         prossimaTentativo: aggiungiOre(48),
         noteChiamata: note,
@@ -215,7 +215,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
       const pipeline = await getAllLeads();
       const lead = pipeline.find((l) => l.telefono === telefono);
       const tentativiAggiornati = (lead?.tentativiChiamata ?? 0) + 1;
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.NON_RISPONDE,
         tentativiChiamata: tentativiAggiornati,
         prossimaTentativo: aggiungiOre(2),
@@ -236,7 +236,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
         lead,
         `Ciao ${lead.nome}, ti ho appena chiamato ma non ho trovato risposta. Ti ricontatterò presto!`,
       ); } catch(e) { console.error("WhatsApp error:", e); }
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.NON_RISPONDE,
         prossimaTentativo: aggiungiOre(24),
         noteChiamata: note,
@@ -246,7 +246,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     }
 
     case 'non_interessato': {
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.NON_INTERESSATO,
         noteChiamata: note,
       });
@@ -255,7 +255,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     }
 
     case 'numero_errato': {
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.NUMERO_ERRATO,
         noteChiamata: note,
       });
@@ -264,7 +264,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     }
 
     case 'ostile': {
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.DA_RICONTATTARE,
         prossimaTentativo: aggiungiOre(24),
         noteChiamata: 'Lead ostile al primo contatto',
@@ -274,7 +274,7 @@ export async function handleVapiWebhook(body: any): Promise<void> {
     }
 
     case 'gia_cliente': {
-      await updatePipelineRow(telefono, {
+      await updateLead(telefono, {
         status: STATUSES.GIA_CLIENTE,
         noteChiamata: note,
       });
@@ -323,7 +323,7 @@ export async function runFeedbackHandler(): Promise<void> {
         : STATUSES.APPUNTAMENTO_COMPLETATO;
 
       // leadId è il telefono del paziente (usato come chiave di ricerca)
-      await updatePipelineRow(leadId, {
+      await updateLead(leadId, {
         feedbackMedico: feedback,
         status: nuovoStatus,
       });
