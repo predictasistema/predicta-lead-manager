@@ -1,9 +1,8 @@
 import { Lead } from '../types/lead';
 import { STATUSES } from '../config/statuses';
 import {
-  getNewLeads,
-  appendToPipeline,
-  updateLeadStatus,
+  getLeads,
+  updateLead,
   updatePipelineRow,
   getPipelineLeads,
 } from '../integrations/googleSheets';
@@ -38,14 +37,13 @@ export async function runLeadManagerCycle(): Promise<void> {
 
   // ── 1. Nuovi lead (status "nuovo" nel foglio leads) ──────────
 
-  const nuoviLead = await getNewLeads();
+  const nuoviLead = await getLeads();
   console.log(`[${ora()}] Nuovi lead trovati: ${nuoviLead.length}`);
 
   for (const lead of nuoviLead) {
     try {
       console.log(`[${ora()}] 📞 Nuovo lead: ${lead.nome} ${lead.cognome} (${lead.telefono})`);
-      await updateLeadStatus(lead.rowIndex, STATUSES.IN_CHIAMATA);
-      await appendToPipeline({ ...lead, status: STATUSES.IN_CHIAMATA });
+      await updateLead(lead.telefono, { status: STATUSES.IN_CHIAMATA });
       const callId = await startCall(lead);
       console.log(`[${ora()}] ✅ Chiamata avviata per ${lead.nome} ${lead.cognome} (callId: ${callId})`);
     } catch (err) {

@@ -29,13 +29,12 @@ function isPast(dateStr) {
 async function runLeadManagerCycle() {
     console.log(`[${ora()}] ▶ Inizio ciclo lead manager`);
     // ── 1. Nuovi lead (status "nuovo" nel foglio leads) ──────────
-    const nuoviLead = await (0, googleSheets_1.getNewLeads)();
+    const nuoviLead = await (0, googleSheets_1.getLeads)();
     console.log(`[${ora()}] Nuovi lead trovati: ${nuoviLead.length}`);
     for (const lead of nuoviLead) {
         try {
             console.log(`[${ora()}] 📞 Nuovo lead: ${lead.nome} ${lead.cognome} (${lead.telefono})`);
-            await (0, googleSheets_1.updateLeadStatus)(lead.rowIndex, statuses_1.STATUSES.IN_CHIAMATA);
-            await (0, googleSheets_1.appendToPipeline)({ ...lead, status: statuses_1.STATUSES.IN_CHIAMATA });
+            await (0, googleSheets_1.updateLead)(lead.telefono, { status: statuses_1.STATUSES.IN_CHIAMATA });
             const callId = await (0, vapi_1.startCall)(lead);
             console.log(`[${ora()}] ✅ Chiamata avviata per ${lead.nome} ${lead.cognome} (callId: ${callId})`);
         }

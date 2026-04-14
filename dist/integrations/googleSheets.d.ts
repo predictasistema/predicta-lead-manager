@@ -1,10 +1,6 @@
 import { Lead } from '../types/lead';
-import { LeadStatus } from '../config/statuses';
-export declare function getNewLeads(): Promise<Array<Lead & {
-    rowIndex: number;
-}>>;
-export declare function updateLeadStatus(rowIndex: number, status: LeadStatus, extra?: Partial<Lead>): Promise<void>;
-export declare function appendToPipeline(lead: Lead): Promise<void>;
+export declare function getLeads(): Promise<Lead[]>;
+export declare function updateLead(telefono: string, updates: Partial<Lead>): Promise<void>;
 export declare function getPipelineLeads(): Promise<Lead[]>;
-export declare function updatePipelineRow(telefono: string, fields: Partial<Lead>): Promise<void>;
+export declare function updatePipelineRow(telefono: string, updates: any): Promise<void>;
 //# sourceMappingURL=googleSheets.d.ts.map
