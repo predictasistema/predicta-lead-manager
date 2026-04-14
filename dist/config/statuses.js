@@ -16,5 +16,6 @@ exports.STATUSES = {
     NUMERO_ERRATO: 'numero_errato',
     GIA_CLIENTE: 'gia_cliente',
     CONVERTITO: 'convertito',
+    HA_ATTACCATO: 'ha_attaccato',
 };
 //# sourceMappingURL=statuses.js.map

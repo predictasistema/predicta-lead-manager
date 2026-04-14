@@ -210,7 +210,8 @@ export async function handleVapiWebhook(body: any): Promise<void> {
       break;
     }
 
-    case 'non_risponde': {
+    case 'ha_attaccato':
+      case 'non_risponde': {
       const pipeline = await getAllLeads();
       const lead = pipeline.find((l) => l.telefono === telefono);
       const tentativiAggiornati = (lead?.tentativiChiamata ?? 0) + 1;

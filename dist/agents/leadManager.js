@@ -183,6 +183,7 @@ async function handleVapiWebhook(body) {
             console.log(`[${ora()}] 📨 Info inviate via WhatsApp a ${telefono}`);
             break;
         }
+        case 'ha_attaccato':
         case 'non_risponde': {
             const pipeline = await (0, googleSheets_1.getAllLeads)();
             const lead = pipeline.find((l) => l.telefono === telefono);

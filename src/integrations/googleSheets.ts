@@ -52,7 +52,7 @@ export async function getLeads(): Promise<Lead[]> {
   const rows = res.data.values ?? [];
   return rows
     .map((row, i) => rowToLead(row, i + 2))
-    .filter(lead => ['nuovo', 'da_ricontattare', 'non_risponde'].includes(lead.status));
+    .filter(lead => ['nuovo', 'da_ricontattare', 'non_risponde', 'ha_attaccato'].includes(lead.status));
 }
 
 export async function updateLead(telefono: string, updates: Partial<Lead>): Promise<void> {

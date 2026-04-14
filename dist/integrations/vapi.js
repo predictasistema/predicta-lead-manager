@@ -114,6 +114,10 @@ async function parseCallResult(webhookBody) {
     const endedReason = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
     console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
     const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
+    // — Ha attaccato (chiamata breve)
+    if (endedReason === 'customer-ended-call' && rawTranscript.split(' ').length < 30) {
+        return { status: 'ha_attaccato', note };
+    }
     // ── Segreteria / voicemail ───────────────────────────────────
     if (endedReason === 'voicemail' || endedReason === 'assistant-ended-call' || endedReason === 'silence-timed-out') {
         return { status: 'segreteria', note };

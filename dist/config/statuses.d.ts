@@ -13,6 +13,7 @@ export declare const STATUSES: {
     readonly NUMERO_ERRATO: "numero_errato";
     readonly GIA_CLIENTE: "gia_cliente";
     readonly CONVERTITO: "convertito";
+    readonly HA_ATTACCATO: "ha_attaccato";
 };
 export type LeadStatus = (typeof STATUSES)[keyof typeof STATUSES];
 //# sourceMappingURL=statuses.d.ts.map

@@ -1,5 +1,5 @@
 import { Lead } from '../types/lead';
-export type CallOutcome = 'qualificato' | 'richiamami' | 'da_ricontattare' | 'info_richieste' | 'gia_cliente' | 'non_interessato' | 'numero_errato' | 'non_risponde' | 'ostile' | 'segreteria';
+export type CallOutcome = 'qualificato' | 'richiamami' | 'da_ricontattare' | 'info_richieste' | 'gia_cliente' | 'ha_attaccato' | 'segreteria' | 'non_interessato' | 'numero_errato' | 'non_risponde' | 'ostile' | 'segreteria';
 export interface ParsedCallOutcome {
     status: CallOutcome;
     note: string;
