@@ -56,7 +56,7 @@ async function getLeads() {
     const rows = res.data.values ?? [];
     return rows
         .map((row, i) => rowToLead(row, i + 2))
-        .filter(lead => lead.status === 'nuovo');
+        .filter(lead => ['nuovo', 'da_ricontattare', 'non_risponde'].includes(lead.status));
 }
 async function updateLead(telefono, updates) {
     const auth = getAuth();
