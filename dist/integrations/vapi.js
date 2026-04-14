@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startCall = startCall;
 exports.parseCallResult = parseCallResult;
+exports.generateItalianSummary = generateItalianSummary;
 const axios_1 = __importDefault(require("axios"));
 const VAPI_API_URL = 'https://api.vapi.ai';
 // ──────────────────────────────────────────────────────────────
@@ -113,7 +114,8 @@ async function parseCallResult(webhookBody) {
     const transcript = rawTranscript.toLowerCase();
     const endedReason = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
     console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
-    const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
+    const rawSummary = msg?.message?.analysis?.summary ?? msg?.analysis?.summary ?? rawTranscript.slice(0, 150);
+    const note = await generateItalianSummary(rawSummary, rawTranscript);
     // — Ha attaccato (chiamata breve)
     if (endedReason === 'customer-ended-call' && rawTranscript.split(' ').length < 30) {
         return { status: 'ha_attaccato', note };
@@ -171,5 +173,32 @@ async function parseCallResult(webhookBody) {
     }
     // ── Default ──────────────────────────────────────────────────
     return { status: 'non_risponde', note };
+}
+async function generateItalianSummary(englishSummary, transcript) {
+    if (!englishSummary && !transcript)
+        return '';
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
+                'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 150,
+                messages: [{
+                        role: 'user',
+                        content: `Riassumi in italiano in massimo 2 righe l'esito di questa chiamata commerciale. Sii conciso e pratico per il medico estetico. Summary: ${englishSummary}. Trascrizione: ${transcript.slice(0, 500)}`
+                    }]
+            })
+        });
+        const data = await response.json();
+        return data.content?.[0]?.text ?? englishSummary;
+    }
+    catch {
+        return englishSummary;
+    }
 }
 //# sourceMappingURL=vapi.js.map

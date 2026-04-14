@@ -153,7 +153,8 @@ export async function parseCallResult(webhookBody: any): Promise<ParsedCallOutco
   const transcript = rawTranscript.toLowerCase();
   const endedReason: string = (msg?.message?.endedReason ?? msg?.endedReason ?? '').toLowerCase();
   console.log('[DEBUG] endedReason:', endedReason, '| transcript length:', rawTranscript.length);
-  const note = (msg?.analysis?.summary ?? rawTranscript.slice(0, 150)).slice(0, 200);
+  const rawSummary = msg?.message?.analysis?.summary ?? msg?.analysis?.summary ?? rawTranscript.slice(0, 150);
+  const note = await generateItalianSummary(rawSummary, rawTranscript);
 
   // — Ha attaccato (chiamata breve)
   if (endedReason === 'customer-ended-call' && rawTranscript.split(' ').length < 30) {
@@ -233,4 +234,30 @@ export async function parseCallResult(webhookBody: any): Promise<ParsedCallOutco
 
   // ── Default ──────────────────────────────────────────────────
   return { status: 'non_risponde', note };
+}
+
+export async function generateItalianSummary(englishSummary: string, transcript: string): Promise<string> {
+  if (!englishSummary && !transcript) return '';
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 150,
+        messages: [{
+          role: 'user',
+          content: `Riassumi in italiano in massimo 2 righe l'esito di questa chiamata commerciale. Sii conciso e pratico per il medico estetico. Summary: ${englishSummary}. Trascrizione: ${transcript.slice(0, 500)}`
+        }]
+      })
+    });
+    const data = await response.json() as { content?: Array<{ text: string }> };
+    return data.content?.[0]?.text ?? englishSummary;
+  } catch {
+    return englishSummary;
+  }
 }
